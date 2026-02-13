@@ -1,24 +1,46 @@
 import { NavLink } from "react-router-dom";
 
-export default function Sidebar() {
+const Sidebar = () => {
   const linkStyle =
-    "block px-4 py-2 rounded hover:bg-gray-700 transition text-sm";
+    "block px-4 py-3 rounded-lg transition hover:bg-gray-800";
 
   return (
-    <aside className="w-60 bg-gray-900 text-white p-4 space-y-3">
-      <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
+    <aside className="w-64 bg-gray-950 border-r border-gray-800 p-4">
+      <h1 className="text-2xl font-bold mb-8 text-yellow-400">
+        Admin Panel
+      </h1>
 
-      <NavLink to="/dashboard" className={linkStyle}>
-        Dashboard
-      </NavLink>
+      <nav className="space-y-2">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+          }
+        >
+          Dashboard
+        </NavLink>
 
-      <NavLink to="/users" className={linkStyle}>
-        Users
-      </NavLink>
+        <NavLink
+          to="/users"
+          className={({ isActive }) =>
+            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+          }
+        >
+          Users
+        </NavLink>
 
-      <NavLink to="/products" className={linkStyle}>
-        Products
-      </NavLink>
+        <NavLink
+          to="/products"
+          className={({ isActive }) =>
+            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+          }
+        >
+          Products
+        </NavLink>
+      </nav>
     </aside>
   );
-}
+};
+
+export default Sidebar;
