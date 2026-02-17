@@ -1,73 +1,83 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "./user.types";
+import Modal from "../../components/ui/Modal";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (user: User) => void;
+  onSave: (user: User) => void;
+  initialData?: User | null;
 }
 
-const UserModal = ({ isOpen, onClose, onAdd }: Props) => {
+const UserModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+}: Props) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setEmail(initialData.email);
+    } else {
+      setName("");
+      setEmail("");
+    }
+  }, [initialData]);
 
   const handleSubmit = () => {
     if (!name || !email) return;
 
-    const newUser: User = {
-      id: Date.now(),
+    const user: User = {
+      id: initialData?.id || Date.now(),
       name,
       email,
-      role: "user",
-      createdAt: new Date().toISOString().split("T")[0],
+      role: initialData?.role || "user",
+      createdAt:
+        initialData?.createdAt ||
+        new Date().toISOString().split("T")[0],
     };
 
-    onAdd(newUser);
-    setName("");
-    setEmail("");
+    onSave(user);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-      <div className="bg-gray-900 p-6 rounded-xl w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Add User</h2>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h2 className="text-xl font-bold mb-4">
+        {initialData ? "Edit User" : "Add User"}
+      </h2>
 
-        <input
-          type="text"
-          placeholder="Name"
-          className="w-full mb-3 p-2 rounded bg-gray-800 border border-gray-700"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      <Input
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="mb-3"
+      />
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-4 p-2 rounded bg-gray-800 border border-gray-700"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <Input
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="mb-4"
+      />
 
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-700 rounded"
-          >
-            Cancel
-          </button>
+      <div className="flex justify-end gap-3">
+        <Button variant="edit" onClick={onClose}>
+          Cancel
+        </Button>
 
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-yellow-500 text-black rounded font-semibold"
-          >
-            Save
-          </button>
-        </div>
+        <Button onClick={handleSubmit}>
+          {initialData ? "Update" : "Save"}
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 };
 

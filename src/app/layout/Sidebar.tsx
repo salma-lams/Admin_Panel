@@ -2,20 +2,26 @@ import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
   const linkStyle =
-    "block px-4 py-3 rounded-lg transition hover:bg-gray-800";
+    "block px-4 py-3 rounded-xl transition font-medium";
 
   return (
-    <aside className="w-64 bg-gray-950 border-r border-gray-800 p-4">
-      <h1 className="text-2xl font-bold mb-8 text-yellow-400">
+    <aside className="w-64 bg-white border-r border-gray-200 p-6 shadow-sm">
+
+      <h1 className="text-2xl font-bold mb-10 text-blue-600">
         Admin Panel
       </h1>
 
       <nav className="space-y-2">
+
         <NavLink
           to="/"
           end
           className={({ isActive }) =>
-            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+            `${linkStyle} ${
+              isActive
+                ? "bg-blue-600 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`
           }
         >
           Dashboard
@@ -24,7 +30,11 @@ const Sidebar = () => {
         <NavLink
           to="/users"
           className={({ isActive }) =>
-            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+            `${linkStyle} ${
+              isActive
+                ? "bg-blue-600 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`
           }
         >
           Users
@@ -33,12 +43,18 @@ const Sidebar = () => {
         <NavLink
           to="/products"
           className={({ isActive }) =>
-            `${linkStyle} ${isActive ? "bg-yellow-500 text-black" : ""}`
+            `${linkStyle} ${
+              isActive
+                ? "bg-blue-600 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`
           }
         >
           Products
         </NavLink>
+
       </nav>
+
     </aside>
   );
 };

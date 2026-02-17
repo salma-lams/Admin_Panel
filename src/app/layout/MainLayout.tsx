@@ -4,14 +4,18 @@ import Navbar from "./Navbar";
 
 const MainLayout = () => {
   return (
-    <div className="flex h-screen bg-gray-950 text-white">
+    <div className="flex h-screen bg-gray-100 text-gray-800">
+      
       <Sidebar />
+
       <div className="flex-1 flex flex-col">
         <Navbar />
-        <main className="p-6 overflow-y-auto flex-1 bg-gray-900">
+
+        <main className="p-8 overflow-y-auto flex-1 bg-gray-50">
           <Outlet />
         </main>
       </div>
+
     </div>
   );
 };

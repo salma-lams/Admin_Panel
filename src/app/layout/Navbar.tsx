@@ -1,12 +1,18 @@
 const Navbar = () => {
   return (
-    <header className="h-16 bg-gray-950 border-b border-gray-800 flex items-center justify-between px-6">
-      <h2 className="text-lg font-semibold">Dashboard</h2>
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+      
+      <h2 className="text-lg font-semibold text-gray-800">
+        Dashboard
+      </h2>
 
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-400">Admin</span>
-        <div className="w-8 h-8 bg-yellow-500 rounded-full"></div>
+        <span className="text-sm text-gray-600">
+          Admin
+        </span>
+        <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
       </div>
+
     </header>
   );
 };
