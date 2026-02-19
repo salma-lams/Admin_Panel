@@ -1,196 +1,244 @@
-import { useEffect, useState } from "react";
-import { getUsers } from "../../features/users/user.api";
-import { getProducts } from "../../features/products/product.api";
-import type { User } from "../../features/users/user.types";
-import type { Product } from "../../features/products/product.types";
+import { useEffect, useMemo, useState } from "react";
 import {
+  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
   CartesianGrid,
-  Area,
-  AreaChart,
 } from "recharts";
+import {
+  Users,
+  Package,
+  DollarSign,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+
+/* ================= TYPES ================= */
+
+type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+};
+
+/* ================= MOCK DATA ================= */
+
+const mockUsers: User[] = [
+  { id: 1, name: "Sara Johnson", email: "sara@mail.com" },
+  { id: 2, name: "Adam Smith", email: "adam@mail.com" },
+  { id: 3, name: "Lina Brown", email: "lina@mail.com" },
+  { id: 4, name: "John Carter", email: "john@mail.com" },
+  { id: 5, name: "Emily Clark", email: "emily@mail.com" },
+  { id: 6, name: "Daniel Lee", email: "daniel@mail.com" },
+  { id: 7, name: "Sophia Kim", email: "sophia@mail.com" },
+];
+
+const mockProducts: Product[] = [
+  { id: 1, name: "Pro Plan", price: 120 },
+  { id: 2, name: "Starter Plan", price: 60 },
+  { id: 3, name: "Enterprise", price: 350 },
+  { id: 4, name: "Growth Plan", price: 180 },
+  { id: 5, name: "Advanced Plan", price: 240 },
+];
+
+/* ================= MAIN ================= */
 
 const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const usersData = await getUsers();
-      const productsData = await getProducts();
-      setUsers(usersData);
-      setProducts(productsData);
-    };
-    fetchData();
+    setTimeout(() => {
+      setUsers(mockUsers);
+      setProducts(mockProducts);
+    }, 400);
   }, []);
 
-  const revenue = products.reduce((acc, p) => acc + p.price, 0);
+  const revenue = useMemo(
+    () => products.reduce((acc, p) => acc + p.price, 0),
+    [products]
+  );
 
-  const chartData = products.map((p) => ({
-    name: p.name,
+  const avgPrice =
+    products.length > 0 ? (revenue / products.length).toFixed(0) : 0;
+
+  const chartData = products.map((p, index) => ({
+    name: `P${index + 1}`,
     revenue: p.price,
+    users: Math.floor(Math.random() * 100) + 20,
   }));
 
   return (
-    <div className="min-h-screen bg-slate-100 p-10 space-y-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 px-8 py-14">
+      <div className="max-w-7xl mx-auto space-y-16">
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-slate-900">
-            Dashboard
-          </h1>
-          <p className="text-slate-500 mt-2">
-            Platform analytics & performance overview
-          </p>
-        </div>
-
-        <button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-6 py-3 rounded-xl shadow-md hover:opacity-90 transition">
-          + New Report
-        </button>
-      </div>
-
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <KPI title="Users" value={users.length} />
-        <KPI title="Products" value={products.length} />
-        <KPI highlight title="Revenue" value={`$${revenue}`} />
-        <KPI title="Growth" value="+18%" />
-      </div>
-
-      {/* Analytics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-slate-800 mb-6">
-            Revenue Analytics
-          </h2>
-
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={chartData}>
-              <CartesianGrid stroke="#f1f5f9" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#6366f1"
-                fill="#c7d2fe"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Activity Feed */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-slate-800 mb-6">
-            Recent Activity
-          </h2>
-
-          <div className="space-y-4 text-sm text-slate-600">
-            {users.slice(-4).map((user) => (
-              <div key={user.id} className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium text-slate-800">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Joined platform
-                  </p>
-                </div>
-              </div>
-            ))}
+        {/* HEADER */}
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-5xl font-bold text-slate-900 tracking-tight">
+              Performance Dashboard
+            </h1>
+            <p className="text-slate-500 mt-3 text-lg">
+              Real-time business analytics overview
+            </p>
           </div>
+
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl shadow-lg transition">
+            Generate Report
+          </button>
         </div>
 
+        {/* KPI GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <KPI
+            title="Users"
+            value={users.length}
+            icon={<Users size={22} />}
+            growth="+12%"
+            color="blue"
+          />
+
+          <KPI
+            title="Revenue"
+            value={`$${revenue}`}
+            icon={<DollarSign size={22} />}
+            growth="+18%"
+            color="green"
+          />
+
+          <KPI
+            title="Avg Price"
+            value={`$${avgPrice}`}
+            icon={<TrendingUp size={22} />}
+            growth="-4%"
+            color="red"
+          />
+
+          <KPI
+            title="Products"
+            value={products.length}
+            icon={<Package size={22} />}
+            growth="+5%"
+            color="blue"
+          />
+        </div>
+
+        {/* CHART + USERS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+          {/* CHART */}
+          <div className="lg:col-span-2 bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
+            <h2 className="text-xl font-semibold text-slate-800 mb-8">
+              Revenue & Users Growth
+            </h2>
+
+            <ResponsiveContainer width="100%" height={340}>
+              <LineChart data={chartData}>
+                <CartesianGrid stroke="#f1f5f9" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#16a34a"
+                  strokeWidth={3}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="users"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* USERS CARD */}
+          <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100">
+            <h2 className="text-xl font-semibold text-slate-800 mb-8">
+              Latest Users
+            </h2>
+
+            <div className="space-y-6">
+              {users.slice(-5).map((u) => (
+                <div
+                  key={u.id}
+                  className="flex justify-between items-center p-4 rounded-2xl hover:bg-slate-50 transition"
+                >
+                  <div>
+                    <p className="font-semibold text-slate-900">{u.name}</p>
+                    <p className="text-sm text-slate-500">{u.email}</p>
+                  </div>
+
+                  <span className="text-xs px-4 py-1.5 rounded-full bg-green-100 text-green-600 font-medium">
+                    Active
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
-
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-        <Card title="Latest Users">
-          {users.slice(-5).map((u) => (
-            <Row key={u.id} left={u.name} right={u.email} />
-          ))}
-        </Card>
-
-        <Card title="Top Products">
-          {products.slice(-5).map((p) => (
-            <Row
-              key={p.id}
-              left={p.name}
-              right={`$${p.price}`}
-            />
-          ))}
-        </Card>
-
-      </div>
-
     </div>
   );
 };
 
+/* ================= KPI COMPONENT ================= */
+
 const KPI = ({
   title,
   value,
-  highlight,
+  icon,
+  growth,
+  color,
 }: {
   title: string;
-  value: number | string;
-  highlight?: boolean;
-}) => (
-  <div
-    className={`rounded-3xl p-6 border shadow-sm transition hover:shadow-md ${
-      highlight
-        ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-transparent"
-        : "bg-white border-gray-100"
-    }`}
-  >
-    <p className={`text-sm ${highlight ? "text-indigo-100" : "text-slate-500"}`}>
-      {title}
-    </p>
-    <h3 className="text-3xl font-bold mt-2">
-      {value}
-    </h3>
-  </div>
-);
+  value: string | number;
+  icon: React.ReactNode;
+  growth: string;
+  color: "green" | "red" | "blue";
+}) => {
+  const colorStyles = {
+    green: "bg-green-50 text-green-600 border-green-200",
+    red: "bg-red-50 text-red-600 border-red-200",
+    blue: "bg-blue-50 text-blue-600 border-blue-200",
+  };
 
-const Card = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-    <h3 className="text-lg font-semibold text-slate-800 mb-4">
-      {title}
-    </h3>
-    <div className="space-y-3">{children}</div>
-  </div>
-);
+  const isPositive = growth.startsWith("+");
 
-const Row = ({
-  left,
-  right,
-}: {
-  left: string;
-  right: string;
-}) => (
-  <div className="flex justify-between text-sm text-slate-600 border-b pb-3">
-    <span>{left}</span>
-    <span className="font-medium text-slate-800">
-      {right}
-    </span>
-  </div>
-);
+  return (
+    <div className={`p-8 rounded-3xl border shadow-lg transition hover:-translate-y-1 hover:shadow-2xl ${colorStyles[color]}`}>
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-medium">{title}</span>
+        {icon}
+      </div>
+
+      <h3 className="text-4xl font-bold mt-6">{value}</h3>
+
+      <div className="flex items-center gap-2 mt-4 text-sm font-medium">
+        {isPositive ? (
+          <ArrowUpRight size={16} />
+        ) : (
+          <ArrowDownRight size={16} />
+        )}
+        {growth} this month
+      </div>
+    </div>
+  );
+};
 
 export default Dashboard;
