@@ -3,5 +3,6 @@ export interface User {
   name: string;
   email: string;
   role: "admin" | "user";
-  active: boolean;
+  active: boolean;       // ⚡ must exist
+  createdAt: string;     // ISO date string
 }

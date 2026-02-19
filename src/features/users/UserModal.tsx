@@ -11,22 +11,23 @@ interface Props {
   initialData?: User | null;
 }
 
-const UserModal = ({
-  isOpen,
-  onClose,
-  onSave,
-  initialData,
-}: Props) => {
+const UserModal = ({ isOpen, onClose, onSave, initialData }: Props) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<User["role"]>("user");
+  const [active, setActive] = useState(true);
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
       setEmail(initialData.email);
+      setRole(initialData.role);
+      setActive(initialData.active);
     } else {
       setName("");
       setEmail("");
+      setRole("user");
+      setActive(true);
     }
   }, [initialData]);
 
@@ -37,10 +38,9 @@ const UserModal = ({
       id: initialData?.id || Date.now(),
       name,
       email,
-      role: initialData?.role || "user",
-      createdAt:
-        initialData?.createdAt ||
-        new Date().toISOString().split("T")[0],
+      role,
+      active,
+      createdAt: initialData?.createdAt || new Date().toISOString(),
     };
 
     onSave(user);
@@ -65,8 +65,26 @@ const UserModal = ({
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="mb-4"
+        className="mb-3"
       />
+
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value as User["role"])}
+        className="mb-3 w-full p-2 border rounded"
+      >
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <label className="flex items-center gap-2 mb-4">
+        <input
+          type="checkbox"
+          checked={active}
+          onChange={(e) => setActive(e.target.checked)}
+        />
+        Active
+      </label>
 
       <div className="flex justify-end gap-3">
         <Button variant="edit" onClick={onClose}>

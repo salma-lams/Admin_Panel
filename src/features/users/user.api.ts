@@ -6,6 +6,7 @@ const fakeUsers: User[] = [
     name: "Salma Lamsaaf",
     email: "salma@gmail.com",
     role: "admin",
+    active: true,
     createdAt: "2026-01-01",
   },
   {
@@ -13,6 +14,7 @@ const fakeUsers: User[] = [
     name: "John Doe",
     email: "john@gmail.com",
     role: "user",
+    active: true,
     createdAt: "2026-01-05",
   },
 ];
