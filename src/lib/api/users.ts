@@ -20,4 +20,5 @@ export const usersApi = {
 
 export const dashboardApi = {
     stats: () => api.get("/dashboard/stats"),
+    userStats: () => api.get("/dashboard/user-stats"),
 };

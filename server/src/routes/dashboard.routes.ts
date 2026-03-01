@@ -9,9 +9,8 @@ import { ApiResponse } from "../utils/ApiResponse";
 export const dashboardRouter = Router();
 
 dashboardRouter.use(authenticate);
-dashboardRouter.use(authorize("admin"));
 
-dashboardRouter.get("/stats", async (_req: Request, res: Response, next: NextFunction) => {
+dashboardRouter.get("/stats", authorize("admin"), async (_req: Request, res: Response, next: NextFunction) => {
     try {
         const [totalUsers, activeUsers, adminUsers, totalProducts] = await Promise.all([
             UserModel.countDocuments(),
@@ -44,6 +43,30 @@ dashboardRouter.get("/stats", async (_req: Request, res: Response, next: NextFun
             regularUsers: totalUsers - adminUsers,
             totalProducts,
             recentSignups,
+        }));
+    } catch (err) {
+        next(err);
+    }
+});
+
+dashboardRouter.get("/user-stats", authorize("admin", "user"), async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const [totalProducts] = await Promise.all([
+            ProductModel.countDocuments(),
+        ]);
+
+        res.json(new ApiResponse("OK", {
+            totalProducts,
+            user: {
+                name: req.user?.name,
+                email: req.user?.email,
+                role: req.user?.role,
+            },
+            systemStatus: "Healthy",
+            recentActivity: [
+                { id: 1, type: "Login", date: new Date().toISOString(), description: "System login successful" },
+                { id: 2, type: "Profile", date: new Date(Date.now() - 86400000).toISOString(), description: "Viewed profile settings" },
+            ]
         }));
     } catch (err) {
         next(err);

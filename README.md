@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# 🚀 Modern Admin Panel: Full-Stack Enterprise Solution
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Admin Panel Mockup](./public/admin_panel_mockup.png)
 
-Currently, two official plugins are available:
+A high-performance, senior-level full-stack admin panel built with modern technologies. This project features a robust backend architecture and a stunning, responsive frontend designed for enterprise-grade applications.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Key Features
 
-## React Compiler
+- **🔐 Advanced Authentication**: Secure JWT-based authentication with role-based access control (RBAC).
+- **📊 Real-time Analytics**: Dynamic charts and performance metrics using Recharts.
+- **👤 User Management**: Comprehensive CRUD operations for user profiles and permissions.
+- **📦 Product Inventory**: Streamlined management of products with status tracking.
+- **🌓 Adaptive UI**: Seamless dark and light mode support with modern typography.
+- **📱 Ultra-Responsive**: Fully optimized for mobile, tablet, and desktop viewports.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Technology Stack
 
-## Expanding the ESLint configuration
+### Frontend (Client)
+- **Next.js 15+** (App Router)
+- **React 19**
+- **Redux Toolkit** (State Management)
+- **Tailwind CSS** (Styling)
+- **Lucide React** (Icons)
+- **Recharts** (Data Visualization)
+- **Axios** (API Requests)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend (Server)
+- **Node.js & Express**
+- **MongoDB & Mongoose** (Database)
+- **JWT & Bcrypt** (Security)
+- **Zod** (Schema Validation)
+- **Morgan & Helmet** (Middleware)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+- Node.js (v18+)
+- MongoDB (Local or Atlas)
+- npm or yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/salma-lams/Admin_Panel.git
+   cd Admin_Panel
+   ```
+
+2. **Setup Backend:**
+   ```bash
+   cd server
+   npm install
+   # Create a .env file based on .env.example
+   npm run build
+   npm start
+   ```
+
+3. **Setup Frontend:**
+   ```bash
+   cd ..
+   npm install
+   # Create a .env file
+   npm run dev
+   ```
+
+### Demo Credentials
+- **Email**: `admin@admin.com`
+- **Password**: `Admin@123`
+
+## 🏗️ Project Structure
+
+```text
+Admin_Panel/
+├── server/             # Express API
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   └── utils/
+│   └── tsconfig.json
+└── src/                # Next.js Frontend
+    ├── app/           # App Router
+    ├── components/    # Reusable UI
+    ├── features/      # Business logic
+    ├── store/         # Redux state
+    └── lib/           # Utilities
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📜 License
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+Built with ❤️ by [salma-lams](https://github.com/salma-lams)
