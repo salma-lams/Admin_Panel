@@ -6,7 +6,7 @@ import Input from "../../components/ui/Input";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (product: Product) => void;
+  onSave: (product: Product) => Promise<void> | void;
   initialData?: Product | null;
 }
 
@@ -16,6 +16,7 @@ const ProductModal = ({
   onSave,
   initialData,
 }: Props) => {
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Product>({
     id: Date.now(),
     name: "",
@@ -38,9 +39,14 @@ const ProductModal = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
-    onSave(form);
-    onClose();
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      await onSave(form);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -80,8 +86,8 @@ const ProductModal = ({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
-            Save
+          <Button onClick={handleSubmit} disabled={saving}>
+            {saving ? "Saving..." : "Save"}
           </Button>
         </div>
       </div>

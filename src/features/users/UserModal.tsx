@@ -7,7 +7,7 @@ import Button from "../../components/ui/Button";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: User) => void;
+  onSave: (user: User) => Promise<void> | void;
   initialData?: User | null;
 }
 
@@ -16,6 +16,7 @@ const UserModal = ({ isOpen, onClose, onSave, initialData }: Props) => {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<User["role"]>("user");
   const [active, setActive] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -31,7 +32,7 @@ const UserModal = ({ isOpen, onClose, onSave, initialData }: Props) => {
     }
   }, [initialData]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name || !email) return;
 
     const user: User = {
@@ -43,8 +44,13 @@ const UserModal = ({ isOpen, onClose, onSave, initialData }: Props) => {
       createdAt: initialData?.createdAt || new Date().toISOString(),
     };
 
-    onSave(user);
-    onClose();
+    setSaving(true);
+    try {
+      await onSave(user);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -91,8 +97,8 @@ const UserModal = ({ isOpen, onClose, onSave, initialData }: Props) => {
           Cancel
         </Button>
 
-        <Button onClick={handleSubmit}>
-          {initialData ? "Update" : "Save"}
+        <Button onClick={handleSubmit} disabled={saving}>
+          {saving ? "Saving..." : initialData ? "Update" : "Save"}
         </Button>
       </div>
     </Modal>

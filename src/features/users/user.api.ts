@@ -1,26 +1,13 @@
 import type { User } from "./user.types";
+import { api } from "../../services/api";
 
-const fakeUsers: User[] = [
-  {
-    id: 1,
-    name: "Salma Lamsaaf",
-    email: "salma@gmail.com",
-    role: "admin",
-    active: true,
-    createdAt: "2026-01-01",
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    email: "john@gmail.com",
-    role: "user",
-    active: true,
-    createdAt: "2026-01-05",
-  },
-];
+export const getUsers = async (): Promise<User[]> => api.get<User[]>("/users");
 
-export const getUsers = async (): Promise<User[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(fakeUsers), 500);
-  });
-};
+export const createUser = async (user: Partial<User>): Promise<User> =>
+  api.post<User>("/users", user);
+
+export const updateUser = async (id: number, user: Partial<User>): Promise<User> =>
+  api.put<User>(`/users/${id}`, user);
+
+export const deleteUser = async (id: number): Promise<void> =>
+  api.delete(`/users/${id}`);
