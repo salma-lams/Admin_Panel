@@ -1,6 +1,6 @@
 "use client";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Bell, Menu, X, Check } from "lucide-react";
+import { Sun, Moon, Bell, Menu, X, Check, Mail } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useAppSelector } from "../../hooks/redux";
 import clsx from "clsx";
@@ -71,6 +71,12 @@ export default function Topbar({ onMenuClick }: Props) {
                         {unreadCount > 0 && (
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full ring-2 ring-white dark:ring-gray-950" />
                         )}
+                    </button>
+
+                    {/* Email Icon */}
+                    <button className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
+                        <Mail size={18} />
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white dark:ring-gray-950" />
                     </button>
 
                     {/* Notifications Dropdown */}

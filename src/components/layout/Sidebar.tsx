@@ -4,7 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { logoutThunk } from "../../store/authSlice";
 import {
-  LayoutDashboard, Users, ShoppingBag, Settings, LogOut, Shield, ChevronRight, BarChart3
+  LayoutDashboard, Users, ShoppingBag, Settings, LogOut, Shield, ChevronRight, BarChart3,
+  ClipboardList, Megaphone, HelpCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
 import clsx from "clsx";
@@ -12,9 +13,12 @@ import clsx from "clsx";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Users", href: "/dashboard/users", icon: Users, adminOnly: true },
+  { label: "Orders", href: "/dashboard/orders", icon: ClipboardList },
   { label: "Products", href: "/dashboard/products", icon: ShoppingBag },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Help", href: "/dashboard/help", icon: HelpCircle },
 ];
 
 interface Props { onClose?: () => void }
