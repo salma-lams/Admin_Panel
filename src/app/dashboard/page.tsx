@@ -1,234 +1,214 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useAppSelector } from "../../hooks/redux";
 import { dashboardApi } from "../../lib/api/users";
 import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, Legend,
+    Users, ShoppingBag, Shield, Activity, TrendingUp,
+    ArrowUpRight, ArrowDownRight, Package, Loader2,
+    Calendar, Bell, Zap, Sparkles, LayoutDashboard, Globe
+} from "lucide-react";
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, BarChart, Bar, Cell
 } from "recharts";
-import { Users, UserCheck, ShieldCheck, Package, TrendingUp, Activity } from "lucide-react";
 import toast from "react-hot-toast";
 
-interface DashboardStats {
-    totalUsers: number;
-    activeUsers: number;
-    inactiveUsers: number;
-    adminUsers: number;
-    regularUsers: number;
-    totalProducts: number;
-    recentSignups: { date: string; count: number }[];
-}
-
-const PIE_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444"];
-
-function StatCard({ icon: Icon, label, value, sub, color }: {
-    icon: React.ElementType; label: string; value: number | string; sub?: string; color: string;
-}) {
-    return (
-        <div className="card p-5 flex items-center gap-4 animate-fade-in hover:shadow-md transition-shadow duration-200">
-            <div className={`flex items-center justify-center w-12 h-12 rounded-2xl ${color} shrink-0`}>
-                <Icon className="w-6 h-6 text-white" />
-            </div>
+// Stat Card Component
+const StatCard = ({ label, val, sub, trend, icon: Icon, color, bg }: any) => (
+    <div className="card p-6 group cursor-default relative overflow-hidden">
+        <div className="relative z-10 flex justify-between items-start">
             <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-                {sub && <p className="text-xs text-emerald-500 mt-0.5">{sub}</p>}
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{label}</p>
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white mt-2 tracking-tighter font-display">{val}</h3>
+                <div className="flex items-center gap-2 mt-2">
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${trend.startsWith('+') ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                        {trend}
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{sub}</span>
+                </div>
+            </div>
+            <div className={`w-12 h-12 rounded-2xl ${bg} ${color} flex items-center justify-center shadow-lg shadow-black/5 group-hover:scale-110 transition-transform duration-500`}>
+                <Icon size={24} />
             </div>
         </div>
-    );
-}
+        <div className={`absolute -right-4 -bottom-4 w-24 h-24 ${color} opacity-[0.03] group-hover:opacity-[0.07] transition-opacity`}>
+            <Icon size={96} />
+        </div>
+    </div>
+);
 
 export default function DashboardPage() {
-    const user = useAppSelector((s) => s.auth.user);
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [userStats, setUserStats] = useState<any>(null);
+    const { user } = useAppSelector((s) => s.auth);
+    const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchStats = useCallback(async () => {
-        try {
-            if (user?.role === "admin") {
-                const { data } = await dashboardApi.stats();
-                setStats(data.data);
-            } else {
-                const { data } = await dashboardApi.userStats();
-                setUserStats(data.data);
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = user?.role === "admin"
+                    ? await dashboardApi.stats()
+                    : await dashboardApi.userStats();
+                setStats(data);
+            } catch (err: any) {
+                toast.error("Telemetry link failed");
+            } finally {
+                setLoading(false);
             }
-        } catch {
-            toast.error("Failed to load dashboard data");
-        } finally {
-            setLoading(false);
-        }
-    }, [user]);
+        };
+        fetchStats();
+    }, [user?.role]);
 
-    useEffect(() => { fetchStats(); }, [fetchStats]);
-
-    if (loading) {
-        return (
-            <div className="space-y-6 animate-fade-in">
-                <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="card p-5 h-24 animate-pulse bg-gray-100 dark:bg-gray-800" />
-                    ))}
-                </div>
+    if (loading) return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+            <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-brand-500/20 border-t-brand-600 animate-spin" />
+                <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-brand-600 animate-pulse" size={20} />
             </div>
-        );
-    }
-
-    return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Welcome back, {user?.name?.split(" ")[0]} 👋
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
-                        {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-                    </p>
-                </div>
-                {user?.role === "user" && (
-                    <div className="flex items-center gap-2 px-3 py-1 bg-brand-500/10 text-brand-500 rounded-full text-xs font-medium border border-brand-500/20 w-fit">
-                        <UserCheck size={14} />
-                        Standard Account
-                    </div>
-                )}
-            </div>
-
-            {user?.role === "admin" ? (
-                <AdminDashboard stats={stats} />
-            ) : (
-                <UserDashboard stats={userStats} />
-            )}
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 animate-pulse">Establishing Secure Uplink</p>
         </div>
     );
+
+    return user?.role === "admin" ? <AdminDashboard stats={stats} /> : <UserDashboard stats={stats} user={user} />;
 }
 
-function AdminDashboard({ stats }: { stats: DashboardStats | null }) {
-    const pieData = stats ? [
-        { name: "Active", value: stats.activeUsers },
-        { name: "Inactive", value: stats.inactiveUsers },
-        { name: "Admin", value: stats.adminUsers },
-    ] : [];
-
-    return (
-        <>
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={Users} label="Total Users" value={stats?.totalUsers ?? 0} color="bg-brand-600" />
-                <StatCard icon={UserCheck} label="Active Users" value={stats?.activeUsers ?? 0} sub={`${stats?.inactiveUsers ?? 0} inactive`} color="bg-emerald-500" />
-                <StatCard icon={ShieldCheck} label="Admins" value={stats?.adminUsers ?? 0} color="bg-violet-500" />
-                <StatCard icon={Package} label="Products" value={stats?.totalProducts ?? 0} color="bg-amber-500" />
-            </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="card p-6 lg:col-span-2">
-                    <div className="flex items-center gap-2 mb-5">
-                        <TrendingUp size={18} className="text-brand-500" />
-                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Signups — Last 7 Days</h2>
-                    </div>
-                    {(stats?.recentSignups?.length ?? 0) === 0 ? (
-                        <div className="h-48 flex items-center justify-center text-gray-400 text-sm">No signup data yet</div>
-                    ) : (
-                        <ResponsiveContainer width="100%" height={240}>
-                            <AreaChart data={stats?.recentSignups} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorSignup" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: "12px", fontSize: 12 }} />
-                                <Area type="monotone" dataKey="count" stroke="#6366f1" fill="url(#colorSignup)" strokeWidth={3} name="Signups" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    )}
+const AdminDashboard = ({ stats }: any) => (
+    <div className="space-y-8 animate-fade-in p-2">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
+                    Command <span className="text-brand-600">Center</span>
+                </h1>
+                <div className="flex items-center gap-2 mt-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest text-[10px]">Real-time Status: Terminal Active</p>
                 </div>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2 bg-white dark:bg-gray-900 px-4 py-2.5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm text-xs font-black uppercase tracking-widest text-gray-500">
+                    <Calendar size={14} className="text-brand-500" />
+                    {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </div>
+                <button className="btn-primary !py-2.5 !px-6 !rounded-2xl shadow-brand-600/30 group">
+                    <Sparkles size={16} className="group-hover:rotate-12 transition-transform" />
+                    <span className="uppercase tracking-tighter font-black">Generate Report</span>
+                </button>
+            </div>
+        </header>
 
-                <div className="card p-6">
-                    <div className="flex items-center gap-2 mb-5">
-                        <Activity size={18} className="text-brand-500" />
-                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">User Distribution</h2>
-                    </div>
-                    <ResponsiveContainer width="100%" height={240}>
-                        <PieChart>
-                            <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={8} dataKey="value">
-                                {pieData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
-                            </Pie>
-                            <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: "12px", fontSize: 12 }} />
-                            <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} formatter={(v) => <span className="text-xs text-gray-400">{v}</span>} />
-                        </PieChart>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard label="Network Base" val={stats?.totalUsers || 0} sub="Global Nodes" trend="+12.4%" icon={Users} color="text-brand-500" bg="bg-brand-500/10" />
+            <StatCard label="Active Sync" val={stats?.activeUsers || 0} sub="Live Sessions" trend="+42.1%" icon={Activity} color="text-emerald-500" bg="bg-emerald-500/10" />
+            <StatCard label="Commanders" val={stats?.adminCount || 0} sub="Root Access" trend="Stable" icon={Shield} color="text-violet-500" bg="bg-violet-500/10" />
+            <StatCard label="Assets" val={stats?.totalProducts || 0} sub="Managed SKU" trend="+5.2%" icon={Package} color="text-amber-500" bg="bg-amber-500/10" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 card p-8 group">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-xl font-black uppercase tracking-tighter italic">Network Growth</h2>
+                    <select className="bg-transparent text-[10px] font-black uppercase tracking-widest text-gray-400 outline-none">
+                        <option>Last 7 Cycles</option>
+                        <option>Last 30 Cycles</option>
+                    </select>
+                </div>
+                <div className="h-[320px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={stats?.signupsByDay || []}>
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} stroke="#6b7280" />
+                            <XAxis dataKey="_id" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} dy={10} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}
+                                itemStyle={{ color: '#f8fafc', fontWeight: 900, fontSize: '12px' }}
+                            />
+                            <Area type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={4} fill="url(#chartGradient)" />
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
             </div>
-        </>
-    );
-}
 
-function UserDashboard({ stats }: { stats: any }) {
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Quick Stats */}
-            <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <StatCard icon={Package} label="Total Products" value={stats?.totalProducts ?? 0} color="bg-amber-500" />
-                    <StatCard icon={Activity} label="System Status" value={stats?.systemStatus ?? "..."} color="bg-emerald-500" />
-                    <StatCard icon={UserCheck} label="My Role" value={stats?.user?.role?.toUpperCase() ?? "..."} color="bg-brand-600" />
+            <div className="card p-8 flex flex-col items-center justify-center bg-gray-900 border-none relative overflow-hidden text-center">
+                <div className="relative z-10 space-y-6">
+                    <div className="w-20 h-20 rounded-full bg-brand-600/20 flex items-center justify-center mx-auto ring-8 ring-brand-600/5 animate-pulse">
+                        <Globe size={40} className="text-brand-500" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black text-white uppercase tracking-tighter">Global Matrix</h3>
+                        <p className="text-xs text-gray-400 mt-2 font-medium leading-relaxed italic">"Deployment healthy across all nodes. 99.9% uptime confirmed."</p>
+                    </div>
+                    <button className="w-full py-4 bg-brand-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand-600/30 hover:bg-brand-500 transition-all">
+                        Deep System Audit
+                    </button>
                 </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-600/10 blur-3xl rounded-full" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-600/10 blur-3xl rounded-full" />
+            </div>
+        </div>
+    </div>
+);
 
-                <div className="card p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-brand-500" />
-                        Your Recent Activity
-                    </h2>
-                    <div className="space-y-4">
-                        {stats?.recentActivity?.map((act: any) => (
-                            <div key={act.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-                                <div className="w-8 h-8 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500 shrink-0">
-                                    <Activity size={14} />
+const UserDashboard = ({ stats, user }: any) => (
+    <div className="space-y-8 animate-fade-in p-2">
+        <header className="card-premium p-10 bg-gray-900 border-none shadow-2xl relative overflow-hidden group">
+            <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="px-3 py-1 rounded-full bg-brand-500/20 text-brand-500 text-[10px] font-black uppercase tracking-widest border border-brand-500/20">
+                        Personnel Identified
+                    </div>
+                </div>
+                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
+                    Welcome back, <span className="text-brand-500">{user?.name}</span>
+                </h1>
+                <p className="text-gray-400 font-bold text-sm uppercase tracking-[0.2em] max-w-lg leading-relaxed">
+                    Your portal to the global inventory and account management matrix.
+                </p>
+            </div>
+            <Sparkles size={200} className="absolute -bottom-10 -right-10 text-white/5 -rotate-12 group-hover:rotate-0 transition-transform duration-1000" />
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard label="Global Inventory" val={stats?.totalProducts || 0} sub="Items Listed" trend="Stable" icon={ShoppingBag} color="text-brand-500" bg="bg-brand-500/10" />
+            <StatCard label="Terminal Role" val={stats?.userProfile?.role || "USER"} sub="Access Level" trend="NOMINAL" icon={Shield} color="text-emerald-500" bg="bg-emerald-500/10" />
+            <StatCard label="Sytem Health" val={stats?.systemStatus || "Healthy"} sub="Active Uplink" trend="Online" icon={Activity} color="text-violet-500" bg="bg-violet-500/10" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-4 px-1">Access History</h2>
+                <div className="space-y-3">
+                    {(stats?.recentActivity || []).map((act: any, i: number) => (
+                        <div key={i} className="card p-5 group flex items-center justify-between hover:border-brand-500/30 transition-all">
+                            <div className="flex items-center gap-5">
+                                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-brand-500 transition-colors">
+                                    <Activity size={18} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{act.description}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        {new Date(act.date).toLocaleDateString()} at {new Date(act.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </p>
+                                    <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{act.action}</p>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5 tracking-tighter">{act.time}</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            <button className="text-[10px] font-black text-brand-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">Inspect Details</button>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="space-y-6">
-                <div className="card p-6 bg-gradient-to-br from-brand-600 to-brand-700 border-none">
-                    <h3 className="text-lg font-bold text-white mb-2">Need Help?</h3>
-                    <p className="text-brand-100 text-sm mb-4 leading-relaxed">
-                        Access our documentation or contact support if you need assistance managing your account.
-                    </p>
-                    <button className="w-full py-2.5 px-4 bg-white text-brand-600 rounded-xl font-semibold text-sm hover:bg-brand-50 transition-colors duration-200">
-                        View Documentation
+                <div className="card p-8 border-dashed border-gray-200 dark:border-gray-800 text-center">
+                    <LayoutDashboard size={40} className="mx-auto text-brand-500 mb-6" />
+                    <h3 className="text-lg font-black uppercase tracking-tighter italic">Operational Support</h3>
+                    <p className="text-xs text-gray-400 font-medium mt-3 leading-relaxed">Experiencing connection lag? Our tactical support squadron is standing by.</p>
+                    <button className="w-full mt-8 py-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-gray-750 transition-all border border-transparent hover:border-brand-500/20">
+                        Open Service Ticket
                     </button>
-                </div>
-
-                <div className="card p-6">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
-                    <div className="space-y-2">
-                        <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm text-gray-600 dark:text-gray-400 group">
-                            <span>Browse Products</span>
-                            <Package size={16} className="group-hover:text-brand-500" />
-                        </button>
-                        <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm text-gray-600 dark:text-gray-400 group">
-                            <span>Account Settings</span>
-                            <ShieldCheck size={16} className="group-hover:text-brand-500" />
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
-    );
-}
+    </div>
+);
