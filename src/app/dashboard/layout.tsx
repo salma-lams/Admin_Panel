@@ -9,32 +9,27 @@ import Topbar from "../../components/layout/Topbar";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const dispatch = useAppDispatch();
     const router = useRouter();
-    const { user, accessToken } = useAppSelector((s: any) => s.auth);
+    const { user, authChecked } = useAppSelector((s: any) => s.auth);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = accessToken || (typeof window !== "undefined" ? localStorage.getItem("accessToken") : null);
-        if (!token) {
-            router.replace("/login");
-            return;
+        if (!authChecked) {
+            dispatch(getMeThunk());
         }
-        if (!user) {
-            dispatch(getMeThunk()).then((res: any) => {
-                if (getMeThunk.rejected.match(res)) router.replace("/login");
-                else setLoading(false);
-            });
-        } else {
-            setLoading(false);
-        }
-    }, [dispatch, router, user, accessToken]);
+    }, [dispatch, authChecked]);
 
-    if (loading) {
+    useEffect(() => {
+        if (authChecked && !user) {
+            router.replace("/login");
+        }
+    }, [authChecked, user, router]);
+
+    if (!authChecked || (authChecked && !user)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-950">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-gray-400 text-sm">Loading...</p>
+                    <p className="text-gray-400 text-sm">Verifying Session...</p>
                 </div>
             </div>
         );

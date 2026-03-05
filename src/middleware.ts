@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/users", "/profile", "/settings"];
+const PROTECTED = ["/dashboard", "/users", "/products", "/orders", "/profile", "/settings"];
 const PUBLIC = ["/login", "/register"];
 
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
-    const token = req.cookies.get("accessToken")?.value ?? req.headers.get("authorization")?.split(" ")[1];
 
-    // Check localStorage via a special cookie set by the frontend
+    // Use the secondary auth cookie for route protection
     const hasAuth = req.cookies.get("_auth")?.value === "1";
 
     const isProtected = PROTECTED.some((p) => pathname.startsWith(p));
@@ -17,12 +16,14 @@ export function middleware(req: NextRequest) {
     if (isProtected && !hasAuth) {
         const url = req.nextUrl.clone();
         url.pathname = "/login";
+        // If they were on a protected page, they should be sent to login
         return NextResponse.redirect(url);
     }
 
     if (isPublic && hasAuth) {
         const url = req.nextUrl.clone();
         url.pathname = "/dashboard";
+        // If they have an auth cookie and try to hit login, send them to dashboard
         return NextResponse.redirect(url);
     }
 

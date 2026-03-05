@@ -11,11 +11,22 @@ export function authenticate(
     _res: Response,
     next: NextFunction
 ): void {
+    // Check both Authorization header and cookies for the access token
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const cookieToken = req.cookies?.accessToken;
+
+    let token: string | undefined;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.slice(7);
+    } else if (cookieToken) {
+        token = cookieToken;
+    }
+
+    if (!token) {
         return next(new ApiError(401, "No token provided"));
     }
-    const token = authHeader.slice(7);
+
     try {
         req.user = verifyAccessToken(token);
         next();

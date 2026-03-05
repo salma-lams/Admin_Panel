@@ -1,4 +1,4 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model, type InferSchemaType, type Document } from "mongoose";
 
 const productSchema = new Schema(
   {
@@ -6,9 +6,11 @@ const productSchema = new Schema(
     name: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
     stock: { type: Number, required: true, min: 0, default: 0 },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
   },
-  { versionKey: false }
+  { timestamps: true, versionKey: false }
 );
 
-export type ProductDocument = InferSchemaType<typeof productSchema>;
-export const ProductModel = model("Product", productSchema);
+export type ProductDocument = InferSchemaType<typeof productSchema> & Document;
+export const ProductModel = model<ProductDocument>("Product", productSchema);

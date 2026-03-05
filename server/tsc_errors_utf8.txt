@@ -1,0 +1,25 @@
+﻿src/controllers/users.controller.ts(60,48): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/controllers/users.controller.ts(94,47): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/controllers/users.controller.ts(111,34): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
+src/routes/dashboard.routes.ts(52,76): error TS2304: Cannot find name 'AuthRequest'.
+src/services/AuthService.ts(78,36): error TS2345: Argument of type 'FlattenMaps<IUser> & Required<{ _id: ObjectId; }> & { __v: number; }' is not assignable to parameter of type 'IUser'.
+  The types of 'collection.conn.db' are incompatible between these types.
+    Type 'FlattenMaps<Db> | undefined' is not assignable to type 'Db | undefined'.
+      Type 'FlattenMaps<Db>' is not assignable to type 'Db'.
+        Types of property 'client' are incompatible.
+          Type 'FlattenMaps<MongoClient>' is missing the following properties from type 'MongoClient': driverInfoList, _close
+src/services/AuthService.ts(111,36): error TS2345: Argument of type 'FlattenMaps<IUser> & Required<{ _id: ObjectId; }> & { __v: number; }' is not assignable to parameter of type 'IUser'.
+  The types of 'collection.conn.db' are incompatible between these types.
+    Type 'FlattenMaps<Db> | undefined' is not assignable to type 'Db | undefined'.
+      Type 'FlattenMaps<Db>' is not assignable to type 'Db'.
+        Types of property 'client' are incompatible.
+          Type 'FlattenMaps<MongoClient>' is missing the following properties from type 'MongoClient': driverInfoList, _close
+src/services/AuthService.ts(135,9): error TS2322: Type '{ name: string; email: string; role: "admin" | "user"; isActive: boolean; isDeleted: boolean; deletedAt?: Date | undefined; createdAt: Date; updatedAt: Date; _id: ObjectId; ... 58 more ...; __v: number; }' is not assignable to type 'Omit<IUser, "password" | "refreshToken">'.
+  The types of 'collection.conn.db' are incompatible between these types.
+    Type 'FlattenMaps<Db> | undefined' is not assignable to type 'Db | undefined'.
+      Type 'FlattenMaps<Db>' is not assignable to type 'Db'.
+        Types of property 'client' are incompatible.
+          Type 'FlattenMaps<MongoClient>' is missing the following properties from type 'MongoClient': driverInfoList, _close

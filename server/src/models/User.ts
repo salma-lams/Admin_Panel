@@ -7,6 +7,8 @@ export interface IUser extends Document {
   role: "admin" | "user";
   isActive: boolean;
   refreshToken?: string;
+  isDeleted: boolean;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +27,8 @@ const userSchema = new Schema<IUser>(
     role: { type: String, enum: ["admin", "user"], default: "user" },
     isActive: { type: Boolean, default: true },
     refreshToken: { type: String, select: false },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
   },
   { timestamps: true, versionKey: false }
 );

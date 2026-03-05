@@ -1,21 +1,34 @@
 import type { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
 
-export function errorHandler(
-    err: unknown,
-    _req: Request,
+export const errorHandler = (
+    err: Error | ApiError,
+    req: Request,
     res: Response,
-    _next: NextFunction
-): void {
+    next: NextFunction
+) => {
+    let statusCode = 500;
+    let message = "Internal Server Error";
+
     if (err instanceof ApiError) {
-        res.status(err.statusCode).json({ success: false, message: err.message });
-        return;
+        statusCode = err.statusCode;
+        message = err.message;
     }
-    // Mongoose duplicate key
-    if ((err as { code?: number }).code === 11000) {
-        res.status(409).json({ success: false, message: "Duplicate value – resource already exists" });
-        return;
-    }
-    console.error(err);
-    res.status(500).json({ success: false, message: "Internal server error" });
-}
+
+    // Log the error using winston
+    logger.error(`${req.method} ${req.path} - ${statusCode} - ${err.message}`, {
+        stack: err.stack,
+        url: req.originalUrl,
+        method: req.method,
+        ip: req.ip,
+    });
+
+    // Keep response concise for production
+    res.status(statusCode).json(new ApiResponse(
+        message,
+        null,
+        process.env.NODE_ENV === "development" ? { stack: err.stack } : undefined
+    ));
+};

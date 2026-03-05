@@ -1,94 +1,56 @@
-import type { Request, Response } from "express";
-import { ProductModel } from "../models/Product";
-import { parseNumericId } from "../utils/ids";
+import type { Request, Response, NextFunction } from "express";
+import { productService } from "../services/ProductService";
+import { ApiResponse } from "../utils/ApiResponse";
 
-function normalizeParam(value: string | string[] | undefined): string {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-  throw new Error("Missing id param");
-}
-
-async function getNextProductId(): Promise<number> {
-  const last = await ProductModel.findOne({}, { id: 1 }).sort({ id: -1 }).lean();
-  return (last?.id ?? 0) + 1;
-}
-
-export async function listProducts(_req: Request, res: Response): Promise<void> {
-  const products = await ProductModel.find().sort({ id: 1 }).lean();
-  res.json(products);
-}
-
-export async function createProduct(req: Request, res: Response): Promise<void> {
-  const payload = req.body as Partial<{
-    id: number;
-    name: string;
-    price: number;
-    stock: number;
-  }>;
-
-  if (!payload.name) {
-    res.status(400).json({ message: "name is required" });
-    return;
-  }
-
-  const id = Number.isInteger(payload.id) && payload.id! > 0 ? payload.id! : await getNextProductId();
-  const product = await ProductModel.create({
-    id,
-    name: payload.name,
-    price: payload.price ?? 0,
-    stock: payload.stock ?? 0,
-  });
-
-  res.status(201).json(product.toObject());
-}
-
-export async function updateProduct(req: Request, res: Response): Promise<void> {
-  let id: number;
+export async function listProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    id = parseNumericId(normalizeParam(req.params.id));
-  } catch {
-    res.status(400).json({ message: "Invalid product id" });
-    return;
+    const { page, limit, search } = req.query as { page?: string; limit?: string; search?: string };
+    const result = await productService.getProducts({
+      page: page ? parseInt(page) : 1,
+      limit: limit ? parseInt(limit) : 10,
+      search
+    });
+    res.json(new ApiResponse("OK", result));
+  } catch (err) {
+    next(err);
   }
-
-  const payload = req.body as Partial<{
-    name: string;
-    price: number;
-    stock: number;
-  }>;
-
-  const product = await ProductModel.findOneAndUpdate(
-    { id },
-    {
-      ...(payload.name !== undefined ? { name: payload.name } : {}),
-      ...(payload.price !== undefined ? { price: payload.price } : {}),
-      ...(payload.stock !== undefined ? { stock: payload.stock } : {}),
-    },
-    { new: true, runValidators: true }
-  ).lean();
-
-  if (!product) {
-    res.status(404).json({ message: "Product not found" });
-    return;
-  }
-
-  res.json(product);
 }
 
-export async function deleteProduct(req: Request, res: Response): Promise<void> {
-  let id: number;
+export async function getProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    id = parseNumericId(normalizeParam(req.params.id));
-  } catch {
-    res.status(400).json({ message: "Invalid product id" });
-    return;
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const product = await productService.getProductByFriendlyId(parseInt(id));
+    res.json(new ApiResponse("OK", product));
+  } catch (err) {
+    next(err);
   }
+}
 
-  const deleted = await ProductModel.findOneAndDelete({ id }).lean();
-  if (!deleted) {
-    res.status(404).json({ message: "Product not found" });
-    return;
+export async function createProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const product = await productService.createProduct(req.body);
+    res.status(201).json(new ApiResponse("Product created", product));
+  } catch (err) {
+    next(err);
   }
+}
 
-  res.status(204).send();
+export async function updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const product = await productService.updateProduct(id, req.body);
+    res.json(new ApiResponse("Product updated", product));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await productService.deleteProduct(id);
+    res.json(new ApiResponse("Product deleted"));
+  } catch (err) {
+    next(err);
+  }
 }

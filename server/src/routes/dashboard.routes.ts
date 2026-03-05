@@ -2,7 +2,7 @@ import { Router } from "express";
 import type { Request, Response, NextFunction } from "express";
 import { UserModel } from "../models/User";
 import { ProductModel } from "../models/Product";
-import { authenticate } from "../middleware/authenticate";
+import { authenticate, AuthRequest } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { ApiResponse } from "../utils/ApiResponse";
 
@@ -51,14 +51,15 @@ dashboardRouter.get("/stats", authorize("admin"), async (_req: Request, res: Res
 
 dashboardRouter.get("/user-stats", authorize("admin", "user"), async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const [totalProducts] = await Promise.all([
+        const [totalProducts, currentUser] = await Promise.all([
             ProductModel.countDocuments(),
+            req.user?.id ? UserModel.findById(req.user.id) : null
         ]);
 
         res.json(new ApiResponse("OK", {
             totalProducts,
             user: {
-                name: req.user?.name,
+                name: currentUser?.name,
                 email: req.user?.email,
                 role: req.user?.role,
             },
