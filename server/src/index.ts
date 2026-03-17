@@ -5,47 +5,71 @@ import { seedInitialData } from "./config/seed";
 import { createApp } from "./app";
 import { logger } from "./utils/logger";
 
-async function bootstrap(): Promise<void> {
-  try {
-    await connectDatabase();
-    await seedInitialData();
+const app = createApp();
 
-    const app = createApp();
-    const server = app.listen(env.PORT, () => {
-      logger.info(`✅ API established on port ${env.PORT} in ${env.NODE_ENV} mode`);
-    });
+// For serverless environments like Vercel, we must ensure the DB connects on the first request
+let dbInitialized = false;
+app.use(async (req, res, next) => {
+  if (!dbInitialized) {
+    try {
+      if (mongoose.connection.readyState !== 1) {
+        await connectDatabase();
+      }
+      dbInitialized = true;
+    } catch (err) {
+      logger.error("DB connection error in serverless middleware", err);
+    }
+  }
+  next();
+});
 
-    // Graceful Shutdown Logic
-    const shutdown = async (signal: string) => {
-      logger.info(`⚠️  ${signal} signal received. Starting graceful shutdown...`);
+// Only start the standalone server if we are NOT running in Vercel
+if (!process.env.VERCEL) {
+  async function bootstrap(): Promise<void> {
+    try {
+      if (mongoose.connection.readyState !== 1) {
+        await connectDatabase();
+      }
+      await seedInitialData();
 
-      server.close(async () => {
-        logger.info("🛑 HTTP server closed.");
-
-        try {
-          await mongoose.connection.close();
-          logger.info("🔌 MongoDB connection closed.");
-          process.exit(0);
-        } catch (err) {
-          logger.error("❌ Error while closing MongoDB:", err);
-          process.exit(1);
-        }
+      const server = app.listen(env.PORT, () => {
+        logger.info(`✅ API established on port ${env.PORT} in ${env.NODE_ENV} mode`);
       });
 
-      // Force close after 10s
-      setTimeout(() => {
-        logger.error("🔴 Could not close connections in time, forcefully shutting down");
-        process.exit(1);
-      }, 10000);
-    };
+      // Graceful Shutdown Logic
+      const shutdown = async (signal: string) => {
+        logger.info(`⚠️  ${signal} signal received. Starting graceful shutdown...`);
 
-    process.on("SIGTERM", () => shutdown("SIGTERM"));
-    process.on("SIGINT", () => shutdown("SIGINT"));
+        server.close(async () => {
+          logger.info("🛑 HTTP server closed.");
 
-  } catch (error) {
-    logger.error("💥 Failed to bootstrap application:", error);
-    process.exit(1);
+          try {
+            await mongoose.connection.close();
+            logger.info("🔌 MongoDB connection closed.");
+            process.exit(0);
+          } catch (err) {
+            logger.error("❌ Error while closing MongoDB:", err);
+            process.exit(1);
+          }
+        });
+
+        setTimeout(() => {
+          logger.error("🔴 Could not close connections in time, forcefully shutting down");
+          process.exit(1);
+        }, 10000);
+      };
+
+      process.on("SIGTERM", () => shutdown("SIGTERM"));
+      process.on("SIGINT", () => shutdown("SIGINT"));
+
+    } catch (error) {
+      logger.error("💥 Failed to bootstrap application:", error);
+      process.exit(1);
+    }
   }
+
+  bootstrap();
 }
 
-bootstrap();
+// Export the app for Vercel Serverless
+export default app;
