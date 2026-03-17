@@ -1,8 +1,8 @@
-# 🚀 Modern Admin Panel: Full-Stack Enterprise Solution
+# 🚀 Modern Admin Panel: Command Center Edition
 
-![Admin Panel Mockup](./public/admin_panel_mockup.png)
+![Dashboard Showcase](./screenshots/dashboard.png)
 
-A high-performance, senior-level full-stack admin panel built with modern technologies. This project features a robust backend architecture and a stunning, responsive frontend designed for enterprise-grade applications.
+A high-performance, senior-level "Command Center" admin panel. This project features a stunning, data-dense tactical dashboard with real-time telemetry, a live operations stream, and premium management modules for users and products.
 
 ## ✨ Key Features
 

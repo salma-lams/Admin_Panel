@@ -33,10 +33,9 @@ export const fetchUsers = createAsyncThunk(
     async (filters: UserFilters, { rejectWithValue }) => {
         try {
             const { data } = await usersApi.list(filters);
-            return data.data;
-        } catch (err: unknown) {
-            const e = err as { response?: { data?: { message?: string } } };
-            return rejectWithValue(e.response?.data?.message ?? "Failed to fetch users");
+            return data.data; // This is the { users, total, pages, page } object
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data?.message ?? "Failed to fetch users");
         }
     }
 );
@@ -47,9 +46,8 @@ export const createUser = createAsyncThunk(
         try {
             const { data } = await usersApi.create(payload);
             return data.data;
-        } catch (err: unknown) {
-            const e = err as { response?: { data?: { message?: string } } };
-            return rejectWithValue(e.response?.data?.message ?? "Failed to create user");
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data?.message ?? "Failed to create user");
         }
     }
 );
@@ -60,9 +58,8 @@ export const updateUser = createAsyncThunk(
         try {
             const { data } = await usersApi.update(id, payload);
             return data.data;
-        } catch (err: unknown) {
-            const e = err as { response?: { data?: { message?: string } } };
-            return rejectWithValue(e.response?.data?.message ?? "Failed to update user");
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data?.message ?? "Failed to update user");
         }
     }
 );
@@ -73,9 +70,8 @@ export const deleteUser = createAsyncThunk(
         try {
             await usersApi.delete(id);
             return id;
-        } catch (err: unknown) {
-            const e = err as { response?: { data?: { message?: string } } };
-            return rejectWithValue(e.response?.data?.message ?? "Failed to delete user");
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data?.message ?? "Failed to delete user");
         }
     }
 );
@@ -89,15 +85,18 @@ const usersSlice = createSlice({
             .addCase(fetchUsers.pending, (s) => { s.isLoading = true; s.error = null; })
             .addCase(fetchUsers.fulfilled, (s, a) => {
                 s.isLoading = false;
-                s.users = a.payload.users;
-                s.total = a.payload.total;
-                s.pages = a.payload.pages;
-                s.page = a.payload.page;
+                s.users = a.payload.data || a.payload.users || [];
+                s.total = a.payload.total || 0;
+                s.pages = a.payload.pages || 1;
+                s.page = a.payload.page || 1;
             })
             .addCase(fetchUsers.rejected, (s, a) => { s.isLoading = false; s.error = a.payload as string; })
-            .addCase(createUser.fulfilled, (s, a) => { s.users.unshift(a.payload); s.total++; })
+            .addCase(createUser.fulfilled, (s, a) => { 
+                if (a.payload) s.users.unshift(a.payload); 
+                s.total++; 
+            })
             .addCase(updateUser.fulfilled, (s, a) => {
-                const idx = s.users.findIndex((u) => u._id === a.payload._id);
+                const idx = s.users.findIndex((u) => u._id === a.payload?._id);
                 if (idx !== -1) s.users[idx] = a.payload;
             })
             .addCase(deleteUser.fulfilled, (s, a) => {
