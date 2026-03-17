@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
@@ -19,8 +19,44 @@ import { logger } from "./utils/logger";
 export function createApp() {
   const app = express();
 
-  // Security
-  app.use(helmet());
+  // CORS MUST come first — before helmet, before any other middleware
+  // Otherwise Helmet's security headers can override CORS headers
+  const STATIC_ORIGINS = [
+    env.CLIENT_ORIGIN,
+    "https://admin-panel-seven-mauve.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ].filter(Boolean) as string[];
+
+  // Regex to allow any Vercel preview deployment for admin-panel project
+  const VERCEL_PREVIEW_REGEX = /^https:\/\/admin-panel-[a-z0-9-]+\.vercel\.app$/;
+
+  const corsOptions: CorsOptions = {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (STATIC_ORIGINS.includes(origin) || VERCEL_PREVIEW_REGEX.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS policy blocked origin: ${origin}`));
+      }
+    },
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["set-cookie"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  };
+
+  // Explicitly handle OPTIONS preflight for all routes
+  app.options("*", cors(corsOptions));
+  app.use(cors(corsOptions));
+
+  // Security (after CORS so it doesn't block cross-origin headers)
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }));
 
   // Structured Logging
   app.use(expressWinston.logger({
@@ -31,33 +67,6 @@ export function createApp() {
     colorize: false,
   }));
 
-  // CORS - Allow localhost, known production URLs, and all Vercel preview deployments
-  const STATIC_ORIGINS = [
-    env.CLIENT_ORIGIN,
-    "https://admin-panel-seven-mauve.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:3001",
-  ].filter(Boolean);
-
-  // Regex to allow any Vercel preview deployment for admin-panel project
-  const VERCEL_PREVIEW_REGEX = /^https:\/\/admin-panel-[a-z0-9-]+\.vercel\.app$/;
-
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (Postman, curl, mobile apps)
-        if (!origin) return callback(null, true);
-        if (STATIC_ORIGINS.includes(origin) || VERCEL_PREVIEW_REGEX.test(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error(`CORS policy blocked origin: ${origin}`));
-        }
-      },
-      credentials: true,
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-      exposedHeaders: ["set-cookie"],
-    })
-  );
   app.use(express.json());
   app.use(cookieParser());
   app.use(csrfProtection);
