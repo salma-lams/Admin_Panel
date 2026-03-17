@@ -31,20 +31,23 @@ export function createApp() {
     colorize: false,
   }));
 
-  // CORS - Allow multiple origins for local dev and production
-  const ALLOWED_ORIGINS = [
+  // CORS - Allow localhost, known production URLs, and all Vercel preview deployments
+  const STATIC_ORIGINS = [
     env.CLIENT_ORIGIN,
     "https://admin-panel-seven-mauve.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
   ].filter(Boolean);
 
+  // Regex to allow any Vercel preview deployment for admin-panel project
+  const VERCEL_PREVIEW_REGEX = /^https:\/\/admin-panel-[a-z0-9-]+\.vercel\.app$/;
+
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (e.g., Postman, curl, mobile apps)
+        // Allow requests with no origin (Postman, curl, mobile apps)
         if (!origin) return callback(null, true);
-        if (ALLOWED_ORIGINS.includes(origin)) {
+        if (STATIC_ORIGINS.includes(origin) || VERCEL_PREVIEW_REGEX.test(origin)) {
           callback(null, true);
         } else {
           callback(new Error(`CORS policy blocked origin: ${origin}`));
