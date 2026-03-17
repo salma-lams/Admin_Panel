@@ -31,9 +31,25 @@ export function createApp() {
     colorize: false,
   }));
 
+  // CORS - Allow multiple origins for local dev and production
+  const ALLOWED_ORIGINS = [
+    env.CLIENT_ORIGIN,
+    "https://admin-panel-seven-mauve.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ].filter(Boolean);
+
   app.use(
     cors({
-      origin: env.CLIENT_ORIGIN,
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g., Postman, curl, mobile apps)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS policy blocked origin: ${origin}`));
+        }
+      },
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
       exposedHeaders: ["set-cookie"],
