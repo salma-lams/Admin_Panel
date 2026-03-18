@@ -45,7 +45,7 @@ export function createApp() {
   ].filter(Boolean) as string[];
 
   // Regex to allow any Vercel preview deployment for admin-panel project
-  const VERCEL_PREVIEW_REGEX = /^https:\/\/admin-panel-[a-z0-9-]+\.vercel\.app$/;
+  const VERCEL_PREVIEW_REGEX = /^https:\/\/(admin-panel|adminpanelfrontend)[a-z0-9-]*\.vercel\.app$/;
 
   const corsOptions: CorsOptions = {
     origin: (origin, callback) => {
