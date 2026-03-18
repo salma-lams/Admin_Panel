@@ -50,7 +50,7 @@ export function createApp() {
   };
 
   // Explicitly handle OPTIONS preflight for all routes
-  app.options("*", cors(corsOptions));
+  app.options("(.*)", cors(corsOptions));
   app.use(cors(corsOptions));
 
   // Security (after CORS so it doesn't block cross-origin headers)
