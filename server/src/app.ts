@@ -49,8 +49,7 @@ export function createApp() {
     optionsSuccessStatus: 204,
   };
 
-  // Explicitly handle OPTIONS preflight for all routes
-  app.options("(.*)", cors(corsOptions));
+  // Handle CORS (this middleware automatically handles OPTIONS preflight)
   app.use(cors(corsOptions));
 
   // Security (after CORS so it doesn't block cross-origin headers)
