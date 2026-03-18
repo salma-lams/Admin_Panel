@@ -15,9 +15,27 @@ import { csrfProtection } from "./middleware/csrf";
 import expressWinston from "express-winston";
 import mongoose from "mongoose";
 import { logger } from "./utils/logger";
+import { connectDatabase } from "./config/db";
+
+let dbInitialized = false;
 
 export function createApp() {
   const app = express();
+
+  // Database Connection Middleware (for Serverless)
+  app.use(async (req, res, next) => {
+    if (!dbInitialized) {
+      try {
+        if (mongoose.connection.readyState !== 1) {
+          await connectDatabase();
+        }
+        dbInitialized = true;
+      } catch (err) {
+        logger.error("DB connection error in app middleware", err);
+      }
+    }
+    next();
+  });
 
   // CORS MUST come first — before helmet, before any other middleware
   // Otherwise Helmet's security headers can override CORS headers

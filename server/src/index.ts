@@ -8,22 +8,7 @@ import { logger } from "./utils/logger";
 const app = createApp();
 
 // For serverless environments like Vercel, we must ensure the DB connects on the first request
-let dbInitialized = false;
-app.use(async (req, res, next) => {
-  if (!dbInitialized) {
-    try {
-      if (mongoose.connection.readyState !== 1) {
-        await connectDatabase();
-      }
-      dbInitialized = true;
-    } catch (err) {
-      logger.error("DB connection error in serverless middleware", err);
-    }
-  }
-  next();
-});
-
-// Only start the standalone server if we are NOT running in Vercel
+// Standalone server bootstrap logic
 if (!process.env.VERCEL) {
   async function bootstrap(): Promise<void> {
     try {
