@@ -5,7 +5,7 @@ export const getCookieOptions = (isRefresh = false): CookieOptions => {
     return {
         httpOnly: true,
         secure: env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: isRefresh
             ? 7 * 24 * 60 * 60 * 1000 // 7 days
