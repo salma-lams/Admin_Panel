@@ -16,14 +16,22 @@ export function csrfProtection(req: Request, _res: Response, next: NextFunction)
     const origin = req.headers.origin;
     const referer = req.headers.referer;
     const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:3000";
+    
+    // Dynamic Regex to allow Vercel domains
+    const VERCEL_REGEX = /^https:\/\/(admin-panel|adminpanelfrontend)[a-z0-9-]*\.vercel\.app$/;
+
+    const isValidOrigin = (url?: string) => {
+        if (!url) return false;
+        return url === clientOrigin || VERCEL_REGEX.test(url) || url.startsWith(clientOrigin);
+    };
 
     // 1. Verify Origin matches our frontend
-    if (origin && origin !== clientOrigin) {
+    if (origin && !isValidOrigin(origin)) {
         return next(new ApiError(403, "CSRF attack detected - Invalid Origin"));
     }
 
     // 2. If no Origin (some browsers), check Referer
-    if (!origin && referer && !referer.startsWith(clientOrigin)) {
+    if (!origin && referer && !isValidOrigin(referer)) {
         return next(new ApiError(403, "CSRF attack detected - Invalid Referer"));
     }
 
