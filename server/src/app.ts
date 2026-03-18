@@ -17,22 +17,17 @@ import mongoose from "mongoose";
 import { logger } from "./utils/logger";
 import { connectDatabase } from "./config/db";
 
-let dbInitialized = false;
-
 export function createApp() {
   const app = express();
 
   // Database Connection Middleware (for Serverless)
   app.use(async (req, res, next) => {
-    if (!dbInitialized) {
-      try {
-        if (mongoose.connection.readyState !== 1) {
-          await connectDatabase();
-        }
-        dbInitialized = true;
-      } catch (err) {
-        logger.error("DB connection error in app middleware", err);
+    try {
+      if (mongoose.connection.readyState !== 1) {
+        await connectDatabase();
       }
+    } catch (err) {
+      logger.error("DB connection error in app middleware", err);
     }
     next();
   });
