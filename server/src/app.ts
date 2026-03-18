@@ -19,6 +19,9 @@ import { connectDatabase } from "./config/db";
 
 export function createApp() {
   const app = express();
+  
+  // Trust proxy for rate limiting on Vercel
+  app.set("trust proxy", 1);
 
   // Database Connection Middleware (for Serverless)
   app.use(async (req, res, next) => {
@@ -104,6 +107,7 @@ export function createApp() {
     });
   };
 
+  app.get("/", healthHandler);
   app.get("/health", healthHandler);
   app.get("/api/health", healthHandler);
 
