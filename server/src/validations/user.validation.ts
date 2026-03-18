@@ -17,7 +17,7 @@ export const updateUserSchema = z.object({
     body: z.object({
         name: z.string().min(2).optional(),
         email: z.string().email().optional(),
-        password: z.string().min(8).optional(),
+        password: z.string().min(8).or(z.literal("")).optional(),
         role: z.enum(["admin", "user"]).optional(),
         isActive: z.boolean().optional(),
     }),
