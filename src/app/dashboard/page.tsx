@@ -9,10 +9,8 @@ import {
     Cpu, Database, Network, Terminal, Server, Cpu as CpuIcon,
     HardDrive, Radio, Search
 } from "lucide-react";
-import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie
-} from "recharts";
+import { NetworkGrowth } from "../../features/dashboard/NetworkGrowth";
+import { SystemPulse, StorageMatrix, OpsStream } from "../../features/dashboard/Monitoring";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -221,111 +219,14 @@ const AdminDashboard = ({ stats, logs }: any) => (
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Primary Telemetry Chart */}
-            <div className="lg:col-span-2 card p-8 group border-none bg-white dark:bg-gray-900 shadow-xl rounded-[2.5rem] relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8">
-                     <div className="flex gap-2">
-                        <div className="w-1 h-3 bg-brand-500 animate-[bounce_1s_infinite_0.1s]" />
-                        <div className="w-1 h-5 bg-brand-500 animate-[bounce_1s_infinite_0.2s]" />
-                        <div className="w-1 h-2 bg-brand-500 animate-[bounce_1s_infinite_0.3s]" />
-                     </div>
-                </div>
-                <div className="flex items-center justify-between mb-8 relative z-10">
-                    <div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter italic">Network Growth</h2>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Personnel expansion metrics</p>
-                    </div>
-                    <select className="bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 outline-none cursor-pointer">
-                        <option>7 Cycle Window</option>
-                        <option>30 Cycle Window</option>
-                    </select>
-                </div>
-                <div className="h-[320px] relative z-10">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={stats?.recentSignups || []}>
-                            <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} stroke="#6b7280" />
-                             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} dy={10} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' }}
-                                itemStyle={{ color: '#f8fafc', fontWeight: 900, fontSize: '12px' }}
-                                cursor={{ stroke: '#6366f1', strokeWidth: 2 }}
-                            />
-                            <Area type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={4} fill="url(#chartGradient)" animationDuration={2000} />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+            <NetworkGrowth stats={stats} />
 
-            {/* Live Operations Stream */}
-            <div className="card p-0 border-none bg-gray-950 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col h-full border border-white/5">
-                <div className="p-6 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Terminal size={18} className="text-emerald-500" />
-                        <h3 className="text-sm font-black text-white uppercase tracking-widest">Ops Stream</h3>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Live</span>
-                    </div>
-                </div>
-                <div className="flex-1 p-6 font-mono text-[11px] space-y-3 overflow-y-auto max-h-[380px] scrollbar-hide">
-                    {logs.map((log: any) => (
-                        <div key={log.id} className="group flex gap-3 animate-slide-in">
-                            <span className="text-gray-600 shrink-0">[{log.time}]</span>
-                            <span className={
-                                log.level === 'err' ? 'text-red-500 font-bold' : 
-                                log.level === 'warn' ? 'text-amber-500' : 'text-gray-300'
-                            }>
-                                {log.msg}
-                            </span>
-                        </div>
-                    ))}
-                    {logs.length === 0 && <div className="text-gray-600 italic">Initializing tactical uplink...</div>}
-                </div>
-            </div>
+            <OpsStream logs={logs} />
         </div>
 
-        {/* Secondary Widgets Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card p-8 bg-white dark:bg-gray-900 border-none shadow-xl rounded-[2.5rem] flex flex-col items-center justify-center text-center group">
-                <div className="w-24 h-24 rounded-full border-8 border-gray-100 dark:border-gray-800 relative flex items-center justify-center mb-6">
-                    <div className="absolute inset-0 rounded-full border-8 border-brand-500 border-t-transparent animate-[spin_3s_linear_infinite]" />
-                    <CpuIcon size={32} className="text-brand-500 group-hover:scale-125 transition-transform" />
-                </div>
-                <h4 className="text-lg font-black uppercase tracking-tighter">System Pulse</h4>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Core Efficiency: 94.2%</p>
-            </div>
-
-            <div className="card p-8 bg-white dark:bg-gray-900 border-none shadow-xl rounded-[2.5rem] group">
-                <div className="flex items-center justify-between mb-6">
-                    <h4 className="text-xs font-black uppercase tracking-[0.2em] italic">Storage Matrix</h4>
-                    <HardDrive size={16} className="text-gray-400" />
-                </div>
-                <div className="space-y-4">
-                    {[
-                        { label: 'Data Clusters', val: 78, color: 'bg-emerald-500' },
-                        { label: 'User Blobs', val: 42, color: 'bg-brand-500' },
-                        { label: 'Asset Buffers', val: 12, color: 'bg-amber-500' },
-                    ].map(item => (
-                        <div key={item.label} className="space-y-1.5">
-                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                                <span className="text-gray-400">{item.label}</span>
-                                <span>{item.val}%</span>
-                            </div>
-                            <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                <div className={`h-full ${item.color} transition-all duration-1000`} style={{ width: `${item.val}%` }} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <SystemPulse />
+            <StorageMatrix />
 
             <div className="card p-8 bg-brand-600 text-white border-none shadow-2xl shadow-brand-600/30 rounded-[2.5rem] relative overflow-hidden group flex flex-col justify-between">
                 <div className="relative z-10">
